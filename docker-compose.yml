@@ -1,0 +1,58 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: laravel_backend
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      - mariadb
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_DATABASE=sistema_instituicao
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+    networks:
+      - sistema-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: vue_frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - sistema-network
+
+  mariadb:
+    image: mariadb:10.6
+    container_name: mariadb_db
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=sistema_instituicao
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - sistema-network
+
+
+
+volumes:
+  mariadb_data:
+
+networks:
+  sistema-network:
+    driver: bridge
